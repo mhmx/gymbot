@@ -16,7 +16,7 @@ exercises = pd.read_csv('exercises.csv', sep=',')
 
 
 def get_stats(chat_id):
-    file_name = f'{chat_id}_stats.csv'
+    file_name = f'stats/{chat_id}_stats.csv'
     if os.path.exists(file_name):
         return pd.read_csv(file_name, sep=',')
     else:
@@ -24,7 +24,7 @@ def get_stats(chat_id):
 
 
 def save_stats(chat_id, df):
-    file_name = f'{chat_id}_stats.csv'
+    file_name = f'stats/{chat_id}_stats.csv'
     df.to_csv(file_name, index=False, sep=',')
 
 
@@ -127,7 +127,7 @@ def show_stats(message):
 @bot.message_handler(commands=['send'])
 def send_files(message):
     chat_id = message.chat.id
-    files = [f'{chat_id}_stats.csv']
+    files = [f'stats/{chat_id}_stats.csv']
     for file in files:
         bot.send_document(message.chat.id, open(file, 'rb'))
     start(message)
