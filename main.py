@@ -132,6 +132,13 @@ def send_files(message):
         bot.send_document(message.chat.id, open(file, 'rb'))
     start(message)
 
+@bot.message_handler(commands=['card'])
+def send_card(message):
+    chat_id = message.chat.id
+    bot.send_photo(message.chat.id, open('files/card.png', 'rb'))
+    #bot.send_document(message.chat.id, open('files/card.png', 'rb'))
+    start(message)
+
 
 def make_keyboard_groups():
     uniques = exercises['group'].unique().tolist()
