@@ -183,7 +183,7 @@ def drop_stat(message):
 
 @bot.message_handler(commands=['drop_ex'])
 def drop_ex(message):
-    df = pd.read_csv('files/exercises.csv')
+    df = exercises
     df = df.drop(df.index[-1])
     df.to_csv('files/exercises.csv', index=False)
     bot.send_message(message.chat.id, '✖️Удалено последнее упражнение из списка')
