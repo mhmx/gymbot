@@ -12,7 +12,7 @@ bot = telebot.TeleBot(TOKEN)
 
 TRAINING_DATA_COLUMNS = ['chat_id', 'date', 'group', 'exercise', 'run', 'weight', 'reps']
 training_data = pd.DataFrame(columns=TRAINING_DATA_COLUMNS)
-exercises = pd.read_csv('exercises.csv', sep=',')
+exercises = pd.read_csv('files/exercises.csv', sep=',')
 
 
 def get_stats(chat_id):
@@ -46,7 +46,7 @@ def choose_exercise(message, group):
     exercise = message.text
     if exercise not in exercises['exercise'].values:
         exercises.loc[len(exercises)] = [group, exercise]
-        exercises.to_csv('exercises.csv', index=False, sep=',')
+        exercises.to_csv('files/exercises.csv', index=False, sep=',')
     training_data.loc[chat_id, 'exercise'] = exercise
     ask_question(chat_id, "🏋🏻‍♂️Введи вес", choose_weight, make_keyboard_nums())
 
@@ -183,9 +183,9 @@ def drop_stat(message):
 
 @bot.message_handler(commands=['drop_ex'])
 def drop_ex(message):
-    df = pd.read_csv('exercises.csv')
+    df = pd.read_csv('files/exercises.csv')
     df = df.drop(df.index[-1])
-    df.to_csv('exercises.csv', index=False)
+    df.to_csv('files/exercises.csv', index=False)
     bot.send_message(message.chat.id, '✖️Удалено последнее упражнение из списка')
     start(message)
 
