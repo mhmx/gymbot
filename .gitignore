@@ -1,2 +1,9 @@
 stats
 config.py
+__pycache__
+venv
+.breakpoints
+.replit
+poetry.lock
+pyproject.toml
+replit.nix
