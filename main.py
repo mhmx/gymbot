@@ -44,6 +44,33 @@ def choose_group(message):
 def choose_exercise(message, group):
     chat_id = message.chat.id
     exercise = message.text
+    df = get_stats(chat_id)
+    df['date'] = pd.to_datetime(df['date'])
+    selected_exercise = df[df['exercise'] == exercise]
+
+    days_of_week_russian = {
+        'Monday': 'пн',
+        'Tuesday': 'вт',
+        'Wednesday': 'ср',
+        'Thursday': 'чт',
+        'Friday': 'пт',
+        'Saturday': 'сб',
+        'Sunday': 'вс'
+    }
+
+    last_date = selected_exercise['date'].max()  # Найти последнюю дату, исключив сегодняшний день
+    today = pd.Timestamp.today().normalize()  # Сегодняшняя дата без времени
+    if last_date == today:
+        last_date = selected_exercise[selected_exercise['date'] < today]['date'].max()
+    result = selected_exercise[selected_exercise['date'] == last_date]
+    if not result.empty:
+        day_of_week = days_of_week_russian[last_date.strftime('%A')]  # Получение названия дня недели на русском
+        message_rep = f"Подходы за {last_date.strftime('%d.%m')} ({day_of_week}):\n\n"
+        for i, row in result.iterrows():
+            message_rep += f"{row['weight']:g} x {row['reps']:g}\n"
+        sent_message = bot.send_message(chat_id, message_rep)
+        bot.pin_chat_message(chat_id, sent_message.message_id)
+
     if exercise not in exercises['exercise'].values:
         exercises.loc[len(exercises)] = [group, exercise]
         exercises.to_csv('files/exercises.csv', index=False, sep=',')
@@ -90,13 +117,16 @@ def save_more_sets(message, run, prev_reps):
         ask_question(chat_id, "🏋🏻‍♂️Введи вес",
                      lambda msg: choose_weight(msg, prev_reps=prev_reps, run=run), make_keyboard_nums())
     else:
+        try:
+            bot.unpin_chat_message(chat_id)
+        except Exception as e:
+            print(f"Ошибка: {e}")
         finish_training(message)
 
 
 def finish_training(message):
-    chat_id = message.chat.id
-    bot.send_message(chat_id, "✅Запись подходов завершена\n\n"
-                              "Продолжить тренировку — /training\n\n",
+    bot.send_message(message.chat.id, "✅Запись подходов завершена\n\n"
+                                      "Продолжить тренировку — /training\n\n",
                      reply_markup=hide_keyboard())
 
 
@@ -126,10 +156,15 @@ def show_stats(message):
 
 @bot.message_handler(commands=['send'])
 def send_files(message):
-    chat_id = message.chat.id
-    files = [f'stats/{chat_id}_stats.csv']
+    files = [f'stats/{message.chat.id}_stats.csv']
     for file in files:
         bot.send_document(message.chat.id, open(file, 'rb'))
+    start(message)
+
+
+@bot.message_handler(commands=['card'])
+def send_card(message):
+    bot.send_photo(message.chat.id, open('files/card.png', 'rb'))
     start(message)
 
 
