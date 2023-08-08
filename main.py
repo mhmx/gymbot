@@ -1,8 +1,10 @@
-import telebot
-import pandas as pd
-from datetime import datetime
-from telebot import types
 import os
+from datetime import datetime
+
+import pandas as pd
+import telebot
+from telebot import types
+
 from config import TOKEN, replit
 
 if replit:
@@ -58,15 +60,15 @@ def choose_exercise(message, group):
         'Sunday': 'вс'
     }
 
-    last_date = selected_exercise['date'].max()  # Найти последнюю дату, исключив сегодняшний день
+    last_date = selected_exercise['date'].max()
     today = pd.Timestamp.today().normalize()  # Сегодняшняя дата без времени
     if last_date == today:
         last_date = selected_exercise[selected_exercise['date'] < today]['date'].max()
     result = selected_exercise[selected_exercise['date'] == last_date]
     if not result.empty:
-        day_of_week = days_of_week_russian[last_date.strftime('%A')]  # Получение названия дня недели на русском
+        day_of_week = days_of_week_russian[last_date.strftime('%A')]
         message_rep = f"Подходы за {last_date.strftime('%d.%m')} ({day_of_week}):\n\n"
-        for i, row in result.iterrows():
+        for _i, row in result.iterrows():
             message_rep += f"{row['weight']:g} x {row['reps']:g}\n"
         sent_message = bot.send_message(chat_id, message_rep)
         bot.pin_chat_message(chat_id, sent_message.message_id)

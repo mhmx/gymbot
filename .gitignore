@@ -1,7 +1,7 @@
-stats/
-venv/
+/stats/
+/venv/
 config.py
-__pycache__/
+/__pycache__/
 .breakpoints
 .replit
 poetry.lock
