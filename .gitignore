@@ -1,5 +1,3 @@
-/stats/
-/venv/
 config.py
 /__pycache__/
 .breakpoints
@@ -7,3 +5,5 @@ config.py
 poetry.lock
 pyproject.toml
 replit.nix
+files/
+stats/
