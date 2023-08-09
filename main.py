@@ -4,9 +4,18 @@ import pandas as pd
 import telebot
 from telebot import types
 from config import TOKEN, replit
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 if replit:
     from background import keep_alive
+
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name('botproject-395416-09b39599f6d2.json', scope)
+client = gspread.authorize(creds)
+
+spreadsheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1C9RPa336oo8eaYnJ74Sl-is9wb2h52JzbTETZSma1vU/edit?usp=sharing')
+worksheet = spreadsheet.get_worksheet(0)  # 0 corresponds to the first worksheet
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -36,7 +45,7 @@ def ask_question(chat_id, question, next_field, keyboard_type):
 def choose_group(message):
     chat_id = message.chat.id
     group = message.text
-    training_data.loc[chat_id, ['chat_id', 'date', 'group']] = [chat_id, (datetime.now()).date(), group]
+    training_data.loc[chat_id, ['chat_id', 'date', 'group']] = [chat_id, str((datetime.now()).date()), group]
     ask_question(chat_id, "📋Выбери упражнение или впиши новое",
                  lambda msg: choose_exercise(msg, group), make_keyboard_exc(group))
 
@@ -105,6 +114,22 @@ def choose_reps(message, run, prev_reps):
     training_data.loc[chat_id, 'reps'] = reps
     df = pd.concat([df, training_data], ignore_index=False)
     save_stats(chat_id, df)
+
+    test = training_data.values.tolist()
+    print(test)
+
+    # data = [[1, 2, 3]]
+    data = training_data.values.tolist()  # Преобразуйте DataFrame в список списков для записи в таблицу
+    all_values = worksheet.get_all_values()
+    last_filled_row = len(all_values)  # Найдите последнюю непустую строку
+
+    for i, row in enumerate(reversed(all_values)):
+        if any(cell.strip() for cell in row):
+            last_filled_row = len(all_values) - i
+            break
+
+    worksheet.insert_rows(data, last_filled_row + 1)
+
     prev_reps = prev_reps + f'{reps:g}\n'
     ask_question(chat_id, f"{prev_reps}\nПродолжаем?",
                  lambda msg: save_more_sets(msg, run=run, prev_reps=prev_reps), make_keyboard_choose())

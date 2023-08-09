@@ -1,9 +1,6 @@
-config.py
 /__pycache__/
 .breakpoints
 .replit
 poetry.lock
 pyproject.toml
 replit.nix
-files/
-stats/
