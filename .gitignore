@@ -1,7 +1,3 @@
-/__pycache__/
-/.idea/
-.breakpoints
-.replit
-poetry.lock
-pyproject.toml
-replit.nix
+.idea/
+config.py
+googleapikey.json
